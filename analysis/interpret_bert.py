@@ -57,7 +57,8 @@ def print_analysis(tokens, attributions, score):
         print(f"  {t:<15} ({attr:+.4f})")
 
 def main():
-    model_path = "models/bert_finetuned_rjokes/"
+    # model_path = "models/bert_finetuned_rjokes/"
+    model_path = "models/bert_finetuned_rjokes_continued/"
     print(f"Loading model from {model_path}...")
     
     try:
