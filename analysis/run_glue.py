@@ -46,7 +46,8 @@ from transformers import (WEIGHTS_NAME, BertConfig,
                                   DistilBertForSequenceClassification,
                                   DistilBertTokenizer)
 
-from transformers import AdamW, get_linear_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup
+from torch.optim import AdamW
 # from transformers import WarmupLinearSchedule as get_linear_schedule_with_warmup
 
 from transformers import glue_output_modes as output_modes
@@ -55,8 +56,9 @@ from transformers import DataProcessor, InputExample
 
 logger = logging.getLogger(__name__)
 
-ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, XLNetConfig, XLMConfig, 
-                                                                                RobertaConfig, DistilBertConfig)), ())
+# ALL_MODELS = sum((tuple(conf.pretrained_config_archive_map.keys()) for conf in (BertConfig, XLNetConfig, XLMConfig, 
+#                                                                                 RobertaConfig, DistilBertConfig)), ())
+ALL_MODELS = ["bert-base-uncased", "roberta-base"]
 
 MODEL_CLASSES = {
     'bert': (BertConfig, BertForSequenceClassification, BertTokenizer),
@@ -156,17 +158,14 @@ class StsbProcessor(DataProcessor):
         examples = []
         for (i, line) in enumerate(lines):
             try:
-                if i == 0:
-                    continue
-                guid = "%s-%s" % (set_type, line[0])
-                text_a = line[1]
-                text_b =  None
-                label = line[0]
+                guid = "%s-%s" % (set_type, i)
+                text_a = line[1] # joke (setup + punchline)
+                text_b = None
+                label = line[0] # score
                 examples.append(
                     InputExample(guid=guid, text_a=text_a, text_b=text_b, label=label))
             except Exception as e:
-                import pdb; pdb.set_trace()
-                print(e)
+                print(f"Error processing line {i}: {e}")
         return examples
 
 # define my own
@@ -409,9 +408,9 @@ def load_and_cache_examples(args, task, tokenizer, evaluate=False):
                                                 label_list=label_list,
                                                 max_length=args.max_seq_length,
                                                 output_mode=output_mode,
-                                                pad_on_left=bool(args.model_type in ['xlnet']),                 # pad on the left for xlnet
-                                                pad_token=tokenizer.convert_tokens_to_ids([tokenizer.pad_token])[0],
-                                                pad_token_segment_id=4 if args.model_type in ['xlnet'] else 0,
+                                                # pad_on_left=bool(args.model_type in ['xlnet']),                 # pad on the left for xlnet
+                                                # pad_token=tokenizer.convert_tokens_to_ids([tokenizer.pad_token])[0],
+                                                # pad_token_segment_id=4 if args.model_type in ['xlnet'] else 0,
         )
         if args.local_rank in [-1, 0]:
             logger.info("Saving features into cached file %s", cached_features_file)
@@ -536,8 +535,12 @@ def main():
 
     # Setup CUDA, GPU & distributed training
     if args.local_rank == -1 or args.no_cuda:
-        device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
-        args.n_gpu = torch.cuda.device_count()
+        if not args.no_cuda and torch.backends.mps.is_available():
+            device = torch.device("mps")
+            args.n_gpu = 1
+        else:
+            device = torch.device("cuda" if torch.cuda.is_available() and not args.no_cuda else "cpu")
+            args.n_gpu = torch.cuda.device_count()
     else:  # Initializes the distributed backend which will take care of sychronizing nodes/GPUs
         torch.cuda.set_device(args.local_rank)
         device = torch.device("cuda", args.local_rank)

@@ -6,3 +6,6 @@ env/
 *cached*
 *checkpoint*
 analysis/output/*
+data/*.tsv
+data/*.json
+data/*.csv  

@@ -10,6 +10,9 @@ import seaborn as sns
 from sklearn.decomposition import LatentDirichletAllocation as LDA
 
 from dataset_statistics import plot_n_most_common_words, EXT_TYPES
+
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
   
 random.seed(42)
 np.random.seed(42)
@@ -71,7 +74,7 @@ def plot_lines_by_year(date_df: pd.DataFrame, data_name: str, name: str = "senti
         ax.errorbar(date_df["date"], date_df["prop"], yerr=date_df["std"], fmt='o', ecolor='black')
         plt.xlabel('Year')
         plt.ylabel('Proportion of Sentiment')
-        plt.savefig(os.path.join(os.path.realpath('..'), "plots", data_name, "{}.{}".format(name, ext_type)))
+        plt.savefig(os.path.join(PROJECT_ROOT, "plots", data_name, "{}.{}".format(name, ext_type)))
         plt.close()
 
 def plot_distribution_by_year(date_df: pd.DataFrame, data_name: str, name: str = "score"):
@@ -80,7 +83,7 @@ def plot_distribution_by_year(date_df: pd.DataFrame, data_name: str, name: str =
         ax = sns.violinplot(x="date", y="score", data=date_df)
         plt.xlabel('Year')
         plt.ylabel('Distribution of Jokes')
-        plt.savefig(os.path.join(os.path.realpath('..'), "plots", data_name, "{}.{}".format(name, ext_type)))
+        plt.savefig(os.path.join(PROJECT_ROOT, "plots", data_name, "{}.{}".format(name, ext_type)))
         plt.close()
 
 def plot_bar_by_year(df: pd.DataFrame, data_name: str, name: str):
@@ -109,12 +112,12 @@ def plot_bar_by_year(df: pd.DataFrame, data_name: str, name: str):
         plt.xlabel('Year')
         plt.ylabel(name)
         plt.tight_layout()
-        plt.savefig(os.path.join(os.path.realpath('..'), "plots", data_name, "{}.{}".format(name, ext_type)))
+        plt.savefig(os.path.join(PROJECT_ROOT, "plots", data_name, "{}.{}".format(name, ext_type)))
         plt.close()
 
 
 if __name__ == "__main__" : 
-    df = pd.read_csv(os.path.join(os.path.realpath('..'), "data", "preprocessed.csv"), index_col=None, encoding="UTF-8", keep_default_na=False)
+    df = pd.read_csv(os.path.join(PROJECT_ROOT, "data", "preprocessed.csv"), index_col=None, encoding="UTF-8", keep_default_na=False)
     df["date"] = pd.to_numeric(df["date"])
     df["score"] = pd.to_numeric(df["score"])
     df = df[df["date"].isna() == False]

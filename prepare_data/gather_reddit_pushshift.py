@@ -11,6 +11,9 @@ import datetime
 import os
 from dateutil.relativedelta import relativedelta
 
+
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+
 PUSHSHIFT_REDDIT_URL = "http://api.pushshift.io/reddit"
 
 def fetchObjects(**kwargs):
@@ -54,7 +57,7 @@ def extract_reddit_data(**kwargs):
     max_id = 0
 
     # Open a file for JSON output
-    file = open(os.path.join(os.path.realpath('..'), "data", "submissions.json"), "w")
+    file = open(os.path.join(PROJECT_ROOT, "data", "submissions.json"), "w")
 
     # While loop for recursive function
     while 1:

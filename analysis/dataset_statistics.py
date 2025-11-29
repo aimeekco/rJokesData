@@ -18,6 +18,7 @@ from nltk import ne_chunk, pos_tag, word_tokenize
 from nltk.tree import Tree
 
 from sklearn.decomposition import LatentDirichletAllocation as LDA
+PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 random.seed(42)
 np.random.seed(42)
@@ -75,7 +76,7 @@ def plot_n_most_common_words(text: pd.Series, data_name: str, n: int = 10, speci
         plt.xticks(x_pos, words, rotation=90) 
         plt.xlabel('words')
         plt.ylabel('counts')
-        plt.savefig(os.path.join(os.path.realpath('..'), "plots", data_name, 
+        plt.savefig(os.path.join(PROJECT_ROOT, "plots", data_name, 
                     "{}top_wordcounts.{}".format("" if specific_year is None else str(specific_year) + "_", ext_type)))
         plt.close()
 
@@ -98,7 +99,7 @@ def run_wordcloud(text: list, data_name: str):
     wordcloud.generate(" ".join(filtered_words))
     # Visualize the word cloud
     for ext_type in EXT_TYPES:
-        wordcloud.to_file(os.path.join(os.path.realpath('..'), "plots", data_name, 'wordCloud.{}'.format(ext_type)))
+        wordcloud.to_file(os.path.join(PROJECT_ROOT, "plots", data_name, 'wordCloud.{}'.format(ext_type)))
         plt.close()
 
 
@@ -124,7 +125,7 @@ def get_statistics(df: pd.DataFrame, data_name: str):
     distrib = distrib[distrib["score"] != 0]
     for ext_type in EXT_TYPES:
         sns.distplot(distrib["score"])
-        plt.savefig(os.path.join(os.path.realpath('..'), "plots", data_name, 'total_score_distribution.{}'.format(ext_type)))
+        plt.savefig(os.path.join(PROJECT_ROOT, "plots", data_name, 'total_score_distribution.{}'.format(ext_type)))
         plt.close()
 
     punch = np.array([len(sentence) for sentence in df["punchline"].values])
@@ -149,7 +150,7 @@ def get_statistics(df: pd.DataFrame, data_name: str):
 
     stat_df = pd.DataFrame([{"ave_punchline_len": average_punch, "ave_body_len": average_body, "ave_joke_len": average_joke, "std_punch": std_punch,
                                 "std_body": std_body, "std_joke": std_joke, "total_tokens": total_tokens}])
-    stat_df.to_csv(os.path.join(os.path.realpath('..'), "plots", data_name, 'statistics.txt'))
+    stat_df.to_csv(os.path.join(PROJECT_ROOT, "plots", data_name, 'statistics.txt'))
 
 
 def plot_sentiment(df: pd.DataFrame, data_name: str):
@@ -166,13 +167,13 @@ def plot_sentiment(df: pd.DataFrame, data_name: str):
         colors = ['steelblue']*2 + ['coral']*2
         ax.errorbar(x_coords, y_coords, yerr=df["std"],
             ecolor=colors, fmt=' ', zorder=-1)
-        ax.savefig(os.path.join(os.path.realpath('..'), "data", data_name, "sentiment_plot.{}".format(ext_type)))
+        ax.savefig(os.path.join(PROJECT_ROOT, "data", data_name, "sentiment_plot.{}".format(ext_type)))
 
 
 
 def gather_data(df: pd.DataFrame, data_name: str):
-    if not os.path.isdir(os.path.join(os.path.realpath('..'), "plots", data_name)):
-        os.mkdir(os.path.join(os.path.realpath('..'), "plots", data_name))
+    if not os.path.isdir(os.path.join(PROJECT_ROOT, "plots", data_name)):
+        os.mkdir(os.path.join(PROJECT_ROOT, "plots", data_name))
     run_wordcloud(df["joke"].tolist(), data_name)
     plot_n_most_common_words(df["joke"].tolist(), data_name)
     get_statistics(df, data_name)
@@ -184,13 +185,13 @@ def percentiles_upvotes(df: pd.DataFrame, data_name: str) -> pd.DataFrame:
         cur_per = np.percentile(df["score"], percentile)
         list_of_percentiles.append({"percentile": percentile, "value": cur_per})
     percent_df = pd.DataFrame(list_of_percentiles)
-    percent_df.to_csv(os.path.join(os.path.realpath('..'), "plots", data_name, "percentiles.csv"))
+    percent_df.to_csv(os.path.join(PROJECT_ROOT, "plots", data_name, "percentiles.csv"))
     return percent_df
 
 
 if __name__ == "__main__":
     # NOTE: log-distribution plots are found in the preprocess.py script
-    df = pd.read_csv(os.path.join(os.path.realpath('..'), "data", "preprocessed.csv"), index_col=None, encoding="UTF-8", keep_default_na=False)
+    df = pd.read_csv(os.path.join(PROJECT_ROOT, "data", "preprocessed.csv"), index_col=None, encoding="UTF-8", keep_default_na=False)
     df["date"] = pd.to_numeric(df["date"])
     df["score"] = pd.to_numeric(df["score"])
     df = df[df["date"].isna() == False]
