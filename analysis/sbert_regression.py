@@ -25,17 +25,28 @@ def generate_embeddings(model, sentences):
 
 def main():
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
-    # train_file = os.path.join(data_dir, "train.tsv")                                                                                                                               
-    # dev_file = os.path.join(data_dir, "dev.tsv")                                                                                                                                  
-    # test_file = os.path.join(data_dir, "test.tsv")
-    train_file = os.path.join(data_dir, "train_2015.tsv")
-    dev_file = os.path.join(data_dir, "test_2019.tsv")
-    test_file = os.path.join(data_dir, "test_2019.tsv")
+    train_file = os.path.join(data_dir, "train.tsv")                                                                                                                               
+    dev_file = os.path.join(data_dir, "test.tsv")                                                                                                                                  
+    test_file = os.path.join(data_dir, "test.tsv")
+    # train_file = os.path.join(data_dir, "train_2015.tsv")
+    # dev_file = os.path.join(data_dir, "test_2019.tsv")
+    # test_file = os.path.join(data_dir, "test_2019.tsv")
 
 
     train_df = load_data(train_file)
     dev_df = load_data(dev_file)
     test_df = load_data(test_file)
+
+    # Limit to specified sizes
+    TRAIN_SIZE = 73559
+    TEST_SIZE = 122309
+    
+    if len(train_df) > TRAIN_SIZE:
+        train_df = train_df.iloc[:TRAIN_SIZE]
+    if len(test_df) > TEST_SIZE:
+        test_df = test_df.iloc[:TEST_SIZE]
+    if len(dev_df) > TEST_SIZE:
+        dev_df = dev_df.iloc[:TEST_SIZE]
 
     print("Data loaded:")
     print(f"Train samples: {len(train_df)}")
