@@ -13,7 +13,6 @@ import argparse
 import pandas as pd
 import numpy as np
 import nltk
-from sklearn.model_selection import train_test_split
 import seaborn as sns
 import matplotlib.pyplot as plt
 
@@ -140,7 +139,12 @@ def read_filter_and_preprocess(file_name: str = "fullrjokes.json", output_name: 
     df["score"] = df["score"].fillna(0)
     print("Values are between", df["score"].value_counts())
     print("For log prediction task, {} unique jokes".format(df.shape))
-    df = df[["score", "joke", "body", "punchline"]]
+    
+    # Sort by date for temporal split
+    df = df.sort_values(by="date").reset_index(drop=True)
+    
+    # Keep date column for reference but reorder columns
+    df = df[["score", "joke", "body", "punchline", "date"]]
 
     # save log-distribution plots
     plt.tight_layout()
@@ -150,12 +154,20 @@ def read_filter_and_preprocess(file_name: str = "fullrjokes.json", output_name: 
     plt.savefig(os.path.join(PROJECT_ROOT, "plots", "all", "logdist.pdf"), bbox_inches = "tight")
     plt.close()
 
-    train, dev = train_test_split(df, test_size=0.2, random_state=42)
-    dev, test = train_test_split(dev, test_size=0.5, random_state=42)
+    n = len(df)
+    train_end = int(n * 0.70)
+    dev_end = int(n * 0.80)
+    
+    train = df.iloc[:train_end]
+    dev = df.iloc[train_end:dev_end]
+    test = df.iloc[dev_end:]
+    
     print("writing train, dev, and test with shapes", train.shape, dev.shape, test.shape)
-    train.to_csv(os.path.join(PROJECT_ROOT, "data", "train.tsv"), sep="\t", quoting=csv.QUOTE_NONE, escapechar='\\', index=None, header=None, encoding="UTF-8")
-    dev.to_csv(os.path.join(PROJECT_ROOT, "data", "dev.tsv"),  sep="\t", quoting=csv.QUOTE_NONE, escapechar='\\', index=None, header=None, encoding="UTF-8")
-    test.to_csv(os.path.join(PROJECT_ROOT, "data", "test.tsv"),  sep="\t", quoting=csv.QUOTE_NONE, escapechar='\\', index=None, header=None, encoding="UTF-8")
+    
+    # Save without date column to maintain compatibility with existing training scripts
+    train[["score", "joke", "body", "punchline"]].to_csv(os.path.join(PROJECT_ROOT, "data", "train.tsv"), sep="\t", quoting=csv.QUOTE_NONE, escapechar='\\', index=None, header=None, encoding="UTF-8")
+    dev[["score", "joke", "body", "punchline"]].to_csv(os.path.join(PROJECT_ROOT, "data", "dev.tsv"),  sep="\t", quoting=csv.QUOTE_NONE, escapechar='\\', index=None, header=None, encoding="UTF-8")
+    test[["score", "joke", "body", "punchline"]].to_csv(os.path.join(PROJECT_ROOT, "data", "test.tsv"),  sep="\t", quoting=csv.QUOTE_NONE, escapechar='\\', index=None, header=None, encoding="UTF-8")
 
 
 
