@@ -25,9 +25,12 @@ def generate_embeddings(model, sentences):
 
 def main():
     data_dir = os.path.join(os.path.dirname(__file__), "..", "data")
-    train_file = os.path.join(data_dir, "train.tsv")
-    dev_file = os.path.join(data_dir, "dev.tsv")
-    test_file = os.path.join(data_dir, "test.tsv")
+    # train_file = os.path.join(data_dir, "train.tsv")                                                                                                                               
+    # dev_file = os.path.join(data_dir, "dev.tsv")                                                                                                                                  
+    # test_file = os.path.join(data_dir, "test.tsv")
+    train_file = os.path.join(data_dir, "train_2015.tsv")
+    dev_file = os.path.join(data_dir, "test_2019.tsv")
+    test_file = os.path.join(data_dir, "test_2019.tsv")
 
 
     train_df = load_data(train_file)
